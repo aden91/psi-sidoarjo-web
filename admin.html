@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - DPD PSI Sidoarjo</title>
+  <!-- Favicon (Elephant Logo) -->
+  <link rel="shortcut icon" href="assets/logo_gajah.png" type="image/png">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Admin specific styling overrides */
+    .admin-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .admin-header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: var(--dark-charcoal);
+      color: white;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .admin-header-nav h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-header-nav h1 img {
+      height: 36px;
+    }
+    .admin-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.01);
+    }
+    .admin-tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .admin-tab-content.active {
+      display: block;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    .btn-action-delete {
+      background: #fff5f5;
+      color: var(--primary-red);
+      border: 1px solid #fed7d7;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-action-delete:hover {
+      background: var(--primary-red);
+      color: white;
+      border-color: var(--primary-red);
+    }
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .admin-add-box {
+      border: 2px dashed var(--border-color);
+      padding: 24px;
+      border-radius: 8px;
+      margin-top: 30px;
+      background: #fdfdfd;
+    }
+  </style>
+</head>
+<body style="background-color: #f7fafc;">
+
+  <div class="admin-container">
+    <!-- Header Nav -->
+    <header class="admin-header-nav">
+      <h1>
+        <img src="assets/logo_gajah.png" alt="PSI Logo">
+        <span>Admin Panel PSI Sidoarjo</span>
+      </h1>
+      <a href="index.html" class="btn-secondary" style="background: white; border: none; font-size: 0.9rem;">
+        <i class="fa-solid fa-arrow-left"></i> Lihat Web Utama
+      </a>
+    </header>
+
+    <div class="admin-card">
+      <div class="section-header">
+        <h2>Manajemen Konten Halaman</h2>
+        <p>Unggah file gambar dan video secara langsung dari perangkat lokal Anda. Data disimpan persisten secara offline menggunakan database IndexedDB browser.</p>
+      </div>
+
+      <!-- Tab Filters -->
+      <div class="filter-tabs" id="admin-main-tabs" style="margin-bottom: 30px;">
+        <button class="filter-btn active" data-tab="profil">Profil & Pengurus</button>
+        <button class="filter-btn" data-tab="berita">Berita Kegiatan</button>
+        <button class="filter-btn" data-tab="video">Galeri Video</button>
+        <button class="filter-btn" data-tab="umkm">Showcase UMKM</button>
+        <button class="filter-btn" data-tab="sobatGaya">Sobat Gaya (Fashion)</button>
+        <button class="filter-btn" data-tab="sobatKarya">Sobat Karya (Jasa)</button>
+        <button class="filter-btn" data-tab="dpc">Peta DPC</button>
+        <button class="filter-btn" data-tab="jadwal">Jadwal Kegiatan</button>
+      </div>
+
+      <!-- 1. PROFIL & PENGURUS TAB -->
+      <div id="tab-profil" class="admin-tab-content active">
+        <h3>Edit Sejarah DPD</h3>
+        <div class="form-group" style="margin: 16px 0 30px 0;">
+          <textarea id="admin-sejarah-input" rows="4" style="width:100%;" class="input-edit-url"></textarea>
+          <button class="btn-primary" onclick="saveSejarah()" style="margin-top: 12px;">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Sejarah DPD
+          </button>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 30px;">
+
+        <h3>Edit Foto & Detail Kepengurusan</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nama Pengurus</th>
+              <th>Jabatan</th>
+              <th>Pratinjau</th>
+              <th>Unggah Foto Pengurus</th>
+            </tr>
+          </thead>
+          <tbody id="admin-pengurus-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. BERITA TAB -->
+      <div id="tab-berita" class="admin-tab-content">
+        <h3>Edit Berita Kegiatan & SEO</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Judul Berita</th>
+              <th>Tanggal</th>
+              <th>Pratinjau</th>
+              <th>Pembaca (Views)</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-berita-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+
+        <!-- Add News Form -->
+        <div class="admin-add-box">
+          <h4><i class="fa-solid fa-plus-circle"></i> Tambah Berita Baru (Optimasi SEO)</h4>
+          <form id="form-add-news" onsubmit="addNewsItem(event)" class="legal-form" style="margin-top:16px;">
+            <div class="form-group">
+              <label>Judul Berita</label>
+              <input type="text" id="add-news-title" required placeholder="Masukkan judul berita">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tanggal Rilis</label>
+                <input type="text" id="add-news-date" required placeholder="Contoh: 24 Juni 2026">
+              </div>
+              <div class="form-group">
+                <label>Pilih Gambar Berita (File Lokal)</label>
+                <div class="file-upload-wrapper">
+                  <button type="button" class="file-upload-btn"><i class="fa-solid fa-image"></i> Pilih File Gambar</button>
+                  <input type="file" id="add-news-img-file" accept="image/*" required onchange="previewUpload(event, 'preview-news')">
+                </div>
+                <div class="file-upload-status" id="preview-news">Belum ada file dipilih</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Frasa Kunci Fokus (SEO Keyphrase)</label>
+                <input type="text" id="add-news-keyphrase" required placeholder="Contoh: sembako murah sidoarjo">
+              </div>
+              <div class="form-group">
+                <label>URL Slug (SEO)</label>
+                <input type="text" id="add-news-slug" required placeholder="Contoh: pasar-sembako-murah-candi">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Hastag (Gunakan koma sebagai pemisah)</label>
+              <input type="text" id="add-news-hashtags" required placeholder="Contoh: #SembakoMurah, #PSISidoarjo, #PeduliWarga">
+            </div>
+            <div class="form-group">
+              <label>Ringkasan Singkat</label>
+              <input type="text" id="add-news-summary" required placeholder="Masukkan deskripsi ringkas berita">
+            </div>
+            <div class="form-group">
+              <label>Deskripsi Meta (SEO Meta Description)</label>
+              <input type="text" id="add-news-meta-desc" required placeholder="Tulis ringkasan pencarian google (maks 160 karakter)...">
+            </div>
+            <div class="form-group">
+              <label>Konten Lengkap Berita</label>
+              <textarea id="add-news-content" rows="4" required placeholder="Tulis isi berita selengkapnya di sini..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 12px;">
+              <i class="fa-solid fa-plus"></i> Tambahkan Berita
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 3. GALERI VIDEO TAB -->
+      <div id="tab-video" class="admin-tab-content">
+        <h3>Edit Rekap Video Kegiatan</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Judul Video</th>
+              <th>Kategori</th>
+              <th>Ganti File Video</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-video-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+
+        <!-- Add Video Form -->
+        <div class="admin-add-box">
+          <h4><i class="fa-solid fa-plus-circle"></i> Tambah Video Baru</h4>
+          <form id="form-add-video" onsubmit="addVideoItem(event)" class="legal-form" style="margin-top:16px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Judul Video</label>
+                <input type="text" id="add-video-title" required placeholder="Contoh: Baksos DPC Tanggulangin">
+              </div>
+              <div class="form-group">
+                <label>Kategori Video</label>
+                <select id="add-video-category">
+                  <option value="DPD Kabupaten">DPD Kabupaten</option>
+                  <option value="DPC Kecamatan">DPC Kecamatan</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Pilih File Video Lokal (MP4/WebM)</label>
+                <div class="file-upload-wrapper">
+                  <button type="button" class="file-upload-btn"><i class="fa-solid fa-file-video"></i> Pilih File Video</button>
+                  <input type="file" id="add-video-file" accept="video/*" required onchange="previewUpload(event, 'preview-video')">
+                </div>
+                <div class="file-upload-status" id="preview-video">Belum ada file dipilih</div>
+              </div>
+              <div class="form-group">
+                <label>Deskripsi Singkat</label>
+                <input type="text" id="add-video-desc" required placeholder="Masukkan rekap singkat kegiatan video">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 12px;">
+              <i class="fa-solid fa-plus"></i> Tambahkan Video
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 4. SHOWCASE UMKM TAB -->
+      <div id="tab-umkm" class="admin-tab-content">
+        <h3>Edit Showcase UMKM Sidoarjo</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nama Usaha</th>
+              <th>Harga</th>
+              <th>WhatsApp</th>
+              <th>Pratinjau</th>
+              <th>Ganti File Gambar</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-umkm-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+
+        <!-- Add UMKM Form -->
+        <div class="admin-add-box">
+          <h4><i class="fa-solid fa-plus-circle"></i> Tambah UMKM Binaan Baru</h4>
+          <form id="form-add-umkm" onsubmit="addUmkmItem(event)" class="legal-form" style="margin-top:16px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nama Usaha / Toko</label>
+                <input type="text" id="add-umkm-name" required placeholder="Contoh: Kupang Lontong Krian">
+              </div>
+              <div class="form-group">
+                <label>Kategori Usaha</label>
+                <select id="add-umkm-category">
+                  <option value="Makanan">Makanan / Kuliner</option>
+                  <option value="Fashion">Fashion / Pakaian</option>
+                  <option value="Kerajinan">Kerajinan Tangan</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Rentang Harga</label>
+                <input type="text" id="add-umkm-price" required placeholder="Contoh: Rp 15.000 - Rp 30.000">
+              </div>
+              <div class="form-group">
+                <label>Wilayah Kecamatan</label>
+                <input type="text" id="add-umkm-address" required placeholder="Contoh: Krian, Sidoarjo">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>No. WhatsApp Hubungi</label>
+                <input type="tel" id="add-umkm-phone" required placeholder="Contoh: 6281234567890">
+              </div>
+              <div class="form-group">
+                <label>Pilih Gambar Produk (File Lokal)</label>
+                <div class="file-upload-wrapper">
+                  <button type="button" class="file-upload-btn"><i class="fa-solid fa-image"></i> Pilih File Gambar</button>
+                  <input type="file" id="add-umkm-img-file" accept="image/*" required onchange="previewUpload(event, 'preview-umkm')">
+                </div>
+                <div class="file-upload-status" id="preview-umkm">Belum ada file dipilih</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Deskripsi Produk</label>
+              <textarea id="add-umkm-desc" rows="3" required placeholder="Tuliskan spesifikasi produk unggulan..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 12px;">
+              <i class="fa-solid fa-plus"></i> Tambahkan UMKM
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 5. SOBAT GAYA (FASHION) TAB -->
+      <div id="tab-sobatGaya" class="admin-tab-content">
+        <h3>Edit Merchandise Sobat Gaya</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nama Barang</th>
+              <th>Harga</th>
+              <th>Pratinjau</th>
+              <th>Ganti File Gambar</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-gaya-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+
+        <!-- Add Gaya Form -->
+        <div class="admin-add-box">
+          <h4><i class="fa-solid fa-plus-circle"></i> Tambah Merchandise Baru</h4>
+          <form id="form-add-gaya" onsubmit="addGayaItem(event)" class="legal-form" style="margin-top:16px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nama Merchandise</label>
+                <input type="text" id="add-gaya-name" required placeholder="Contoh: Jaket Bomber Gajah Hitam">
+              </div>
+              <div class="form-group">
+                <label>Harga Jual</label>
+                <input type="text" id="add-gaya-price" required placeholder="Contoh: Rp 150.000">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Pilih Gambar Baju (File Lokal)</label>
+                <div class="file-upload-wrapper">
+                  <button type="button" class="file-upload-btn"><i class="fa-solid fa-image"></i> Pilih File Gambar</button>
+                  <input type="file" id="add-gaya-img-file" accept="image/*" required onchange="previewUpload(event, 'preview-gaya')">
+                </div>
+                <div class="file-upload-status" id="preview-gaya">Belum ada file dipilih</div>
+              </div>
+              <div class="form-group">
+                <label>WhatsApp Admin</label>
+                <input type="text" id="add-gaya-phone" required placeholder="Contoh: 6281234567895">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Deskripsi Merchandise</label>
+              <textarea id="add-gaya-desc" rows="3" required placeholder="Detail bahan dan ukuran barang..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 12px;">
+              <i class="fa-solid fa-plus"></i> Tambahkan Merchandise
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 6. SOBAT KARYA (JASA) TAB -->
+      <div id="tab-sobatKarya" class="admin-tab-content">
+        <h3>Edit Jasa Sobat Karya</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nama Jasa</th>
+              <th>Penyedia</th>
+              <th>Kategori</th>
+              <th>Tarif</th>
+              <th>WhatsApp</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-karya-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+
+        <!-- Add Karya Form -->
+        <div class="admin-add-box">
+          <h4><i class="fa-solid fa-plus-circle"></i> Tambah Layanan Jasa Baru</h4>
+          <form id="form-add-karya" onsubmit="addKaryaItem(event)" class="legal-form" style="margin-top:16px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nama Layanan Jasa</label>
+                <input type="text" id="add-karya-name" required placeholder="Contoh: Jasa Pembuatan Website Caleg">
+              </div>
+              <div class="form-group">
+                <label>Kategori Jasa</label>
+                <select id="add-karya-category">
+                  <option value="Jasa Desain">Jasa Desain</option>
+                  <option value="Jasa Service">Jasa Service</option>
+                  <option value="Jasa Lainnya">Jasa Lainnya</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Penyedia (Nama & Wilayah)</label>
+                <input type="text" id="add-karya-provider" required placeholder="Contoh: Bro Andi (Kader Prambon)">
+              </div>
+              <div class="form-group">
+                <label>Perkiraan Tarif</label>
+                <input type="text" id="add-karya-price" required placeholder="Contoh: Mulai Rp 100.000">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>WhatsApp Pemesanan</label>
+                <input type="tel" id="add-karya-phone" required placeholder="Contoh: 6281234567890">
+              </div>
+              <div class="form-group">
+                <label>Deskripsi Jasa & Keahlian</label>
+                <input type="text" id="add-karya-desc" required placeholder="Deskripsi ringkas jasa layanan...">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 12px;">
+              <i class="fa-solid fa-plus"></i> Tambahkan Jasa
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 7. PETA DPC TAB -->
+      <div id="tab-dpc" class="admin-tab-content">
+        <h3>Manajemen DPC Kecamatan</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Kecamatan</th>
+              <th>Nama Ketua</th>
+              <th>Alamat Kantor</th>
+              <th>WhatsApp</th>
+              <th>Koordinat X,Y</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-dpc-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+
+        <!-- Add DPC Form -->
+        <div class="admin-add-box">
+          <h4><i class="fa-solid fa-plus-circle"></i> Tambah DPC Kecamatan Baru</h4>
+          <form id="form-add-dpc" onsubmit="addDpcItem(event)" class="legal-form" style="margin-top:16px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Kecamatan</label>
+                <input type="text" id="add-dpc-kecamatan" required placeholder="Contoh: Tulangan">
+              </div>
+              <div class="form-group">
+                <label>Nama Ketua DPC</label>
+                <input type="text" id="add-dpc-ketua" required placeholder="Contoh: Siti Khalimah">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Alamat Sekretariat DPC</label>
+              <input type="text" id="add-dpc-alamat" required placeholder="Contoh: Jl. Raya Tulangan No. 10">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>No. WhatsApp Ketua / Kantor</label>
+                <input type="tel" id="add-dpc-phone" required placeholder="Contoh: 6281234567890">
+              </div>
+              <div class="form-group">
+                <label>Koordinat Pin DPC (Klik Peta Di Bawah Untuk Mengisi)</label>
+                <div style="display:flex; gap:10px;">
+                  <input type="text" id="add-dpc-x" required placeholder="Latitude (Lintang)" readonly style="width:50%; background:#f8f9fa;">
+                  <input type="text" id="add-dpc-y" required placeholder="Longitude (Bujur)" readonly style="width:50%; background:#f8f9fa;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Coordinate Picker Map Preview -->
+            <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:8px;">Pilih Lokasi di Peta Sidoarjo (Klik Peta):</label>
+            <div class="admin-map-picker-container" id="add-dpc-map-picker" style="z-index: 1;">
+              <!-- Leaflet Map Picker -->
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 16px;">
+              <i class="fa-solid fa-plus"></i> Tambahkan DPC Kecamatan
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 8. JADWAL KEGIATAN TAB -->
+      <div id="tab-jadwal" class="admin-tab-content">
+        <h3>Manajemen Jadwal Kegiatan DPD / DPC</h3>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Jam</th>
+              <th>Nama Kegiatan</th>
+              <th>Lokasi</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-jadwal-tbody">
+            <!-- Loaded by JS -->
+          </tbody>
+        </table>
+
+        <!-- Add Schedule Form -->
+        <div class="admin-add-box">
+          <h4><i class="fa-solid fa-plus-circle"></i> Tambah Kegiatan/Agenda Baru</h4>
+          <form id="form-add-jadwal" onsubmit="addJadwalItem(event)" class="legal-form" style="margin-top:16px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tanggal Pelaksanaan</label>
+                <input type="text" id="add-jadwal-tanggal" required placeholder="Contoh: 28 Juni 2026">
+              </div>
+              <div class="form-group">
+                <label>Jam Kegiatan</label>
+                <input type="text" id="add-jadwal-jam" required placeholder="Contoh: 09:00 - 12:00 atau selesai">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nama Kegiatan</label>
+                <input type="text" id="add-jadwal-nama" required placeholder="Masukkan nama kegiatan">
+              </div>
+              <div class="form-group">
+                <label>Lokasi / Tempat</label>
+                <input type="text" id="add-jadwal-lokasi" required placeholder="Masukkan lokasi acara">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 12px;">
+              <i class="fa-solid fa-plus"></i> Tambahkan Agenda Kegiatan
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EDIT NEWS MODAL (SEO OPTIMIZED) -->
+  <div class="modal-overlay" id="edit-news-modal">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Edit Detail Berita & Optimasi SEO</h3>
+        <button class="modal-close" onclick="closeEditNewsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form class="legal-form" id="form-edit-news" onsubmit="saveEditedNews(event)">
+          <input type="hidden" id="edit-news-index">
+          <div class="form-group">
+            <label>Judul Berita</label>
+            <input type="text" id="edit-news-title" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tanggal Rilis</label>
+              <input type="text" id="edit-news-date" required>
+            </div>
+            <div class="form-group">
+              <label>Foto Berita Saat Ini</label>
+              <img id="edit-news-img-preview" src="" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid var(--border-color); display:block;">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pilih Gambar Baru (Kosongkan jika tidak diganti)</label>
+              <div class="file-upload-wrapper">
+                <button type="button" class="file-upload-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Ganti Gambar</button>
+                <input type="file" id="edit-news-img-file" accept="image/*" onchange="previewUpload(event, 'preview-news-edit')">
+              </div>
+              <div class="file-upload-status" id="preview-news-edit">Belum ada file dipilih</div>
+            </div>
+            <div class="form-group">
+              <label>Frasa Kunci Fokus (SEO Focus Keyphrase)</label>
+              <input type="text" id="edit-news-keyphrase" required placeholder="Contoh: sembako murah sidoarjo">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>URL Slug (SEO)</label>
+              <input type="text" id="edit-news-slug" required placeholder="Contoh: pasar-sembako-murah-candi">
+            </div>
+            <div class="form-group">
+              <label>Hastag (Gunakan koma sebagai pemisah)</label>
+              <input type="text" id="edit-news-hashtags" required placeholder="Contoh: #SembakoMurah, #PSISidoarjo">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Ringkasan Singkat</label>
+            <input type="text" id="edit-news-summary" required>
+          </div>
+          <div class="form-group">
+            <label>Deskripsi Meta (SEO Meta Description)</label>
+            <input type="text" id="edit-news-meta-desc" required placeholder="Tulis deskripsi ringkas pencarian google...">
+          </div>
+          <div class="form-group">
+            <label>Konten Lengkap Berita</label>
+            <textarea id="edit-news-content" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top: 12px; width: 100%; justify-content: center;">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Semua Perubahan
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT DPC MODAL -->
+  <div class="modal-overlay" id="edit-dpc-modal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Edit Detail DPC Kecamatan</h3>
+        <button class="modal-close" onclick="closeEditDpcModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form class="legal-form" id="form-edit-dpc" onsubmit="saveEditedDpc(event)">
+          <input type="hidden" id="edit-dpc-index">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Kecamatan</label>
+              <input type="text" id="edit-dpc-kecamatan" required>
+            </div>
+            <div class="form-group">
+              <label>Nama Ketua DPC</label>
+              <input type="text" id="edit-dpc-ketua" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Alamat Sekretariat DPC</label>
+            <input type="text" id="edit-dpc-alamat" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>No. WhatsApp</label>
+              <input type="tel" id="edit-dpc-phone" required>
+            </div>
+            <div class="form-group">
+              <label>Koordinat Pin DPC (Klik Peta Di Bawah Untuk Mengubah)</label>
+              <div style="display:flex; gap:10px;">
+                <input type="text" id="edit-dpc-x" required placeholder="Latitude" readonly style="width:50%; background:#f8f9fa;">
+                <input type="text" id="edit-dpc-y" required placeholder="Longitude" readonly style="width:50%; background:#f8f9fa;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Coordinate Picker Map -->
+          <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:8px;">Pilih Lokasi di Peta Sidoarjo (Klik Peta):</label>
+          <div class="admin-map-picker-container" id="edit-dpc-map-picker" style="z-index: 1;">
+            <!-- Leaflet Map Picker -->
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 16px; width:100%; justify-content:center;">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan DPC
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT KEGIATAN MODAL -->
+  <div class="modal-overlay" id="edit-jadwal-modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Edit Agenda Kegiatan</h3>
+        <button class="modal-close" onclick="closeEditJadwalModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form class="legal-form" id="form-edit-jadwal" onsubmit="saveEditedJadwal(event)">
+          <input type="hidden" id="edit-jadwal-index">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tanggal Pelaksanaan</label>
+              <input type="text" id="edit-jadwal-tanggal" required>
+            </div>
+            <div class="form-group">
+              <label>Jam Kegiatan</label>
+              <input type="text" id="edit-jadwal-jam" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nama Kegiatan</label>
+            <input type="text" id="edit-jadwal-nama" required>
+          </div>
+          <div class="form-group">
+            <label>Lokasi / Tempat</label>
+            <input type="text" id="edit-jadwal-lokasi" required>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top: 16px; width: 100%; justify-content: center;">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan Agenda
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Shared Data Loader and Admin Panel Controller -->
+  <script src="db.js"></script>
+  <script src="data.js"></script>
+  <script>
+    // State management local
+    let AdminState = {
+      profil: null,
+      berita: null,
+      umkm: null,
+      sobatGaya: null,
+      sobatKarya: null,
+      videos: null,
+      dpc: null,
+      jadwalKegiatan: null
+    };
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await window.PSIMediaDB.init(); // Initialize IndexedDB
+      initAdminState();
+      initAdminTabs();
+      renderAllAdminSections();
+    });
+
+    function initAdminState() {
+      const data = window.PSISidoarjoData;
+      if (!data) return;
+
+      AdminState.profil = getOrSet("psi_profil", data.profil);
+      AdminState.berita = getOrSet("psi_berita", data.berita);
+      AdminState.umkm = getOrSet("psi_umkm", data.umkm);
+      AdminState.sobatGaya = getOrSet("psi_sobatGaya", data.sobatGaya);
+      AdminState.sobatKarya = getOrSet("psi_sobatKarya", data.sobatKarya);
+      AdminState.videos = getOrSet("psi_videos", data.videos);
+      AdminState.dpc = getOrSet("psi_dpc", data.dpc);
+      // Migrate old DPC data format (percentage coordinate x/y) to new geo coordinates (lat/lng)
+      if (AdminState.dpc && AdminState.dpc.length > 0 && (typeof AdminState.dpc[0].lat === "undefined" || typeof AdminState.dpc[0].x !== "undefined")) {
+        console.log("Migrating old DPC data to geo-coordinates...");
+        AdminState.dpc = data.dpc;
+        localStorage.setItem("psi_dpc", JSON.stringify(data.dpc));
+      }
+      AdminState.jadwalKegiatan = getOrSet("psi_jadwalKegiatan", data.jadwalKegiatan);
+    }
+
+    function getOrSet(key, fallback) {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        try { return JSON.parse(stored); } catch(e) {}
+      }
+      localStorage.setItem(key, JSON.stringify(fallback));
+      return fallback;
+    }
+
+    function saveAndSync(key) {
+      localStorage.setItem(`psi_${key}`, JSON.stringify(AdminState[key]));
+    }
+
+    function initAdminTabs() {
+      const tabs = document.querySelectorAll("#admin-main-tabs .filter-btn");
+      const contents = document.querySelectorAll(".admin-tab-content");
+
+      tabs.forEach(btn => {
+        btn.addEventListener("click", () => {
+          tabs.forEach(b => b.classList.remove("active"));
+          contents.forEach(c => c.classList.remove("active"));
+
+          btn.classList.add("active");
+          const targetTab = btn.getAttribute("data-tab");
+          document.getElementById(`tab-${targetTab}`).classList.add("active");
+          
+          if (targetTab === "dpc" && window.adminAddMap) {
+            setTimeout(() => {
+              window.adminAddMap.invalidateSize();
+            }, 100);
+          }
+        });
+      });
+    }
+
+    function renderAllAdminSections() {
+      // 1. Profil & Pengurus
+      document.getElementById("admin-sejarah-input").value = AdminState.profil.sejarah;
+      renderPengurusTable();
+
+      // 2. Berita
+      renderBeritaTable();
+
+      // 3. Videos
+      renderVideoTable();
+
+      // 4. UMKM
+      renderUmkmTable();
+
+      // 5. Sobat Gaya
+      renderGayaTable();
+
+      // 6. Sobat Karya
+      renderKaryaTable();
+
+      // 7. Peta DPC
+      renderDpcTable();
+
+      // 8. Jadwal Kegiatan
+      renderJadwalTable();
+
+      // Initialize coordinate pickers
+      initAdminMapPickers();
+    }
+
+    // Helper to resolve db:// media to Object URLs for local thumbnails
+    async function resolvePreview(mediaUrl, elementId, fallback) {
+      const img = document.getElementById(elementId);
+      if (!img) return;
+
+      if (mediaUrl && mediaUrl.startsWith("db://")) {
+        const resolved = await window.PSIMediaDB.getUrl(mediaUrl);
+        if (resolved) {
+          img.src = resolved;
+          return;
+        }
+      }
+      img.src = fallback;
+    }
+
+    // Input preview file label update
+    window.previewUpload = function(event, labelId) {
+      const file = event.target.files[0];
+      const status = document.getElementById(labelId);
+      if (file && status) {
+        status.textContent = `Pilihan: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+      }
+    };
+
+    // 1. Profil & Pengurus
+    function renderPengurusTable() {
+      const tbody = document.getElementById("admin-pengurus-tbody");
+      tbody.innerHTML = AdminState.profil.struktur.map((member, idx) => `
+        <tr>
+          <td style="font-weight:700;">${member.nama}</td>
+          <td>${member.jabatan}</td>
+          <td><img class="admin-thumb" id="prev-pengurus-${idx}" src=""></td>
+          <td>
+            <div class="action-cell">
+              <div class="file-upload-wrapper" style="width: auto;">
+                <button type="button" class="file-upload-btn" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-cloud-arrow-up"></i> Ganti Foto</button>
+                <input type="file" accept="image/*" onchange="handleRowFileUpload(event, 'profil', ${idx}, 'prev-pengurus-${idx}')">
+              </div>
+              <div class="file-upload-status" id="stat-pengurus-${idx}" style="margin-top:0;">Ready</div>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      // Resolve Previews
+      AdminState.profil.struktur.forEach((member, idx) => {
+        resolvePreview(member.foto, `prev-pengurus-${idx}`, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200&h=200');
+      });
+    }
+
+    window.saveSejarah = function() {
+      AdminState.profil.sejarah = document.getElementById("admin-sejarah-input").value;
+      saveAndSync("profil");
+      alert("Sejarah DPD berhasil diperbarui!");
+    };
+
+    // Generic upload handler for table rows
+    window.handleRowFileUpload = async function(event, stateKey, index, previewElementId) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const statusEl = document.getElementById(`stat-${stateKey}-${index}`);
+      if (statusEl) statusEl.textContent = "Mengunggah...";
+
+      // Generate unique key for IndexedDB
+      const mediaKey = `db://media-${stateKey}-${index}-${Date.now()}`;
+      try {
+        await window.PSIMediaDB.save(mediaKey, file);
+        
+        // Update State
+        if (stateKey === "profil") {
+          AdminState.profil.struktur[index].foto = mediaKey;
+          saveAndSync("profil");
+          resolvePreview(mediaKey, previewElementId, '');
+        } else if (stateKey === "umkm") {
+          AdminState.umkm[index].gambar = mediaKey;
+          saveAndSync("umkm");
+          resolvePreview(mediaKey, previewElementId, '');
+        } else if (stateKey === "sobatGaya") {
+          AdminState.sobatGaya[index].gambar = mediaKey;
+          saveAndSync("sobatGaya");
+          resolvePreview(mediaKey, previewElementId, '');
+        } else if (stateKey === "videos") {
+          AdminState.videos[index].embedUrl = mediaKey;
+          saveAndSync("videos");
+        }
+
+        if (statusEl) statusEl.textContent = "Selesai!";
+      } catch (err) {
+        console.error("Upload error:", err);
+        if (statusEl) statusEl.textContent = "Gagal!";
+      }
+    };
+
+    // 2. Berita with Views & SEO modal edit
+    function renderBeritaTable() {
+      const tbody = document.getElementById("admin-berita-tbody");
+      tbody.innerHTML = AdminState.berita.map((news, idx) => {
+        const views = localStorage.getItem(`psi_views_${news.id}`) || 0;
+        return `
+          <tr>
+            <td style="font-weight:700; font-size:0.85rem;">${news.judul.substring(0, 45)}...</td>
+            <td>${news.tanggal}</td>
+            <td><img class="admin-thumb" id="prev-berita-${idx}" src=""></td>
+            <td style="font-weight:700; text-align:center;"><i class="fa-regular fa-eye"></i> ${views}</td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-primary" onclick="openEditNewsModal(${idx})" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-pen-to-square"></i> Edit Detail</button>
+                <button class="btn-action-delete" onclick="deleteBerita(${idx})" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      AdminState.berita.forEach((news, idx) => {
+        resolvePreview(news.gambar, `prev-berita-${idx}`, 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200&h=200');
+      });
+    }
+
+    window.deleteBerita = function(idx) {
+      if (confirm("Hapus berita ini?")) {
+        AdminState.berita.splice(idx, 1);
+        saveAndSync("berita");
+        renderBeritaTable();
+      }
+    };
+
+    window.addNewsItem = async function(e) {
+      e.preventDefault();
+      const title = document.getElementById("add-news-title").value;
+      const date = document.getElementById("add-news-date").value;
+      const fileInput = document.getElementById("add-news-img-file");
+      const summary = document.getElementById("add-news-summary").value;
+      const content = document.getElementById("add-news-content").value;
+      
+      const hashtags = document.getElementById("add-news-hashtags").value;
+      const slug = document.getElementById("add-news-slug").value;
+      const metaDesc = document.getElementById("add-news-meta-desc").value;
+      const keyphrase = document.getElementById("add-news-keyphrase").value;
+
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const mediaKey = `db://media-news-add-${Date.now()}`;
+      try {
+        await window.PSIMediaDB.save(mediaKey, file);
+
+        const item = {
+          id: AdminState.berita.length + 1,
+          judul: title,
+          tanggal: date,
+          gambar: mediaKey,
+          ringkasan: summary,
+          konten: content,
+          hashtags: hashtags,
+          slug: slug,
+          metaDesc: metaDesc,
+          keyphrase: keyphrase
+        };
+
+        AdminState.berita.unshift(item);
+        saveAndSync("berita");
+        renderBeritaTable();
+        document.getElementById("form-add-news").reset();
+        document.getElementById("preview-news").textContent = "Belum ada file dipilih";
+        alert("Berita baru berhasil ditambahkan!");
+      } catch (err) {
+        alert("Gagal mengunggah gambar berita!");
+      }
+    };
+
+    // Edit News modal handlers
+    window.openEditNewsModal = function(idx) {
+      const news = AdminState.berita[idx];
+      if (!news) return;
+
+      document.getElementById("edit-news-index").value = idx;
+      document.getElementById("edit-news-title").value = news.judul;
+      document.getElementById("edit-news-date").value = news.tanggal;
+      document.getElementById("edit-news-summary").value = news.ringkasan;
+      document.getElementById("edit-news-content").value = news.konten;
+      
+      document.getElementById("edit-news-keyphrase").value = news.keyphrase || "";
+      document.getElementById("edit-news-slug").value = news.slug || "";
+      document.getElementById("edit-news-hashtags").value = news.hashtags || "";
+      document.getElementById("edit-news-meta-desc").value = news.metaDesc || "";
+
+      resolvePreview(news.gambar, "edit-news-img-preview", 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200&h=200');
+
+      document.getElementById("edit-news-modal").classList.add("active");
+    };
+
+    window.closeEditNewsModal = function() {
+      document.getElementById("edit-news-modal").classList.remove("active");
+      document.getElementById("form-edit-news").reset();
+      document.getElementById("preview-news-edit").textContent = "Belum ada file dipilih";
+    };
+
+    window.saveEditedNews = async function(e) {
+      e.preventDefault();
+      const idx = document.getElementById("edit-news-index").value;
+      const news = AdminState.berita[idx];
+      if (!news) return;
+
+      const title = document.getElementById("edit-news-title").value;
+      const date = document.getElementById("edit-news-date").value;
+      const summary = document.getElementById("edit-news-summary").value;
+      const content = document.getElementById("edit-news-content").value;
+      
+      const keyphrase = document.getElementById("edit-news-keyphrase").value;
+      const slug = document.getElementById("edit-news-slug").value;
+      const hashtags = document.getElementById("edit-news-hashtags").value;
+      const metaDesc = document.getElementById("edit-news-meta-desc").value;
+
+      const fileInput = document.getElementById("edit-news-img-file");
+      const file = fileInput.files[0];
+
+      // Update basic fields
+      news.judul = title;
+      news.tanggal = date;
+      news.ringkasan = summary;
+      news.konten = content;
+      news.keyphrase = keyphrase;
+      news.slug = slug;
+      news.hashtags = hashtags;
+      news.metaDesc = metaDesc;
+
+      // Handle image file upload if exists
+      if (file) {
+        const mediaKey = `db://media-news-edit-${idx}-${Date.now()}`;
+        try {
+          await window.PSIMediaDB.save(mediaKey, file);
+          news.gambar = mediaKey;
+        } catch (err) {
+          console.error("Failed to save edited image file:", err);
+        }
+      }
+
+      saveAndSync("berita");
+      renderBeritaTable();
+      closeEditNewsModal();
+      alert("Detail berita & metadata SEO berhasil disimpan!");
+    };
+
+    // 3. Videos
+    function renderVideoTable() {
+      const tbody = document.getElementById("admin-video-tbody");
+      tbody.innerHTML = AdminState.videos.map((vid, idx) => `
+        <tr>
+          <td style="font-weight:700; font-size:0.85rem;">${vid.judul}</td>
+          <td><span class="umkm-tag" style="margin-bottom:0;">${vid.kategori}</span></td>
+          <td>
+            <div class="action-cell">
+              <div class="file-upload-wrapper" style="width: auto;">
+                <button type="button" class="file-upload-btn" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-video"></i> Ganti File Video</button>
+                <input type="file" accept="video/*" onchange="handleRowFileUpload(event, 'videos', ${idx}, '')">
+              </div>
+              <div class="file-upload-status" id="stat-videos-${idx}" style="margin-top:0;">Ready</div>
+            </div>
+          </td>
+          <td>
+            <button class="btn-action-delete" onclick="deleteVideo(${idx})"><i class="fa-solid fa-trash"></i> Hapus</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.deleteVideo = function(idx) {
+      if (confirm("Hapus video ini?")) {
+        AdminState.videos.splice(idx, 1);
+        saveAndSync("videos");
+        renderVideoTable();
+      }
+    };
+
+    window.addVideoItem = async function(e) {
+      e.preventDefault();
+      const title = document.getElementById("add-video-title").value;
+      const category = document.getElementById("add-video-category").value;
+      const fileInput = document.getElementById("add-video-file");
+      const desc = document.getElementById("add-video-desc").value;
+
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const mediaKey = `db://media-video-add-${Date.now()}`;
+      try {
+        await window.PSIMediaDB.save(mediaKey, file);
+
+        const item = {
+          id: AdminState.videos.length + 1,
+          judul: title,
+          kategori: category,
+          embedUrl: mediaKey,
+          deskripsi: desc,
+          tanggal: "Baru rilis"
+        };
+
+        AdminState.videos.unshift(item);
+        saveAndSync("videos");
+        renderVideoTable();
+        document.getElementById("form-add-video").reset();
+        document.getElementById("preview-video").textContent = "Belum ada file dipilih";
+        alert("Video rekap baru berhasil ditambahkan!");
+      } catch (err) {
+        alert("Gagal mengunggah berkas video!");
+      }
+    };
+
+    // 4. UMKM
+    function renderUmkmTable() {
+      const tbody = document.getElementById("admin-umkm-tbody");
+      tbody.innerHTML = AdminState.umkm.map((item, idx) => `
+        <tr>
+          <td style="font-weight:700; font-size:0.85rem;">${item.nama}</td>
+          <td>${item.harga}</td>
+          <td>+${item.wa}</td>
+          <td><img class="admin-thumb" id="prev-umkm-${idx}" src=""></td>
+          <td>
+            <div class="action-cell">
+              <div class="file-upload-wrapper" style="width: auto;">
+                <button type="button" class="file-upload-btn" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-cloud-arrow-up"></i> Ganti Gambar</button>
+                <input type="file" accept="image/*" onchange="handleRowFileUpload(event, 'umkm', ${idx}, 'prev-umkm-${idx}')">
+              </div>
+              <div class="file-upload-status" id="stat-umkm-${idx}" style="margin-top:0;">Ready</div>
+            </div>
+          </td>
+          <td>
+            <button class="btn-action-delete" onclick="deleteUmkm(${idx})"><i class="fa-solid fa-trash"></i> Hapus</button>
+          </td>
+        </tr>
+      `).join("");
+
+      AdminState.umkm.forEach((item, idx) => {
+        resolvePreview(item.gambar, `prev-umkm-${idx}`, 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200&h=200');
+      });
+    }
+
+    window.deleteUmkm = function(idx) {
+      if (confirm("Hapus produk UMKM ini?")) {
+        AdminState.umkm.splice(idx, 1);
+        saveAndSync("umkm");
+        renderUmkmTable();
+      }
+    };
+
+    window.addUmkmItem = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById("add-umkm-name").value;
+      const category = document.getElementById("add-umkm-category").value;
+      const price = document.getElementById("add-umkm-price").value;
+      const address = document.getElementById("add-umkm-address").value;
+      const phone = document.getElementById("add-umkm-phone").value.replace(/\D/g,'');
+      const fileInput = document.getElementById("add-umkm-img-file");
+      const desc = document.getElementById("add-umkm-desc").value;
+
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const mediaKey = `db://media-umkm-add-${Date.now()}`;
+      try {
+        await window.PSIMediaDB.save(mediaKey, file);
+
+        const item = {
+          id: AdminState.umkm.length + 1,
+          nama: name,
+          kategori: category,
+          deskripsi: desc,
+          harga: price,
+          alamat: address,
+          gambar: mediaKey,
+          wa: phone.startsWith("0") ? "62" + phone.slice(1) : phone
+        };
+
+        AdminState.umkm.unshift(item);
+        saveAndSync("umkm");
+        renderUmkmTable();
+        document.getElementById("form-add-umkm").reset();
+        document.getElementById("preview-umkm").textContent = "Belum ada file dipilih";
+        alert("Produk UMKM binaan baru berhasil ditambahkan!");
+      } catch (err) {
+        alert("Gagal mengunggah gambar UMKM!");
+      }
+    };
+
+    // 5. Sobat Gaya
+    function renderGayaTable() {
+      const tbody = document.getElementById("admin-gaya-tbody");
+      tbody.innerHTML = AdminState.sobatGaya.map((item, idx) => `
+        <tr>
+          <td style="font-weight:700; font-size:0.85rem;">${item.nama}</td>
+          <td>${item.harga}</td>
+          <td><img class="admin-thumb" id="prev-gaya-${idx}" src=""></td>
+          <td>
+            <div class="action-cell">
+              <div class="file-upload-wrapper" style="width: auto;">
+                <button type="button" class="file-upload-btn" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-cloud-arrow-up"></i> Ganti Gambar</button>
+                <input type="file" accept="image/*" onchange="handleRowFileUpload(event, 'sobatGaya', ${idx}, 'prev-gaya-${idx}')">
+              </div>
+              <div class="file-upload-status" id="stat-sobatGaya-${idx}" style="margin-top:0;">Ready</div>
+            </div>
+          </td>
+          <td>
+            <button class="btn-action-delete" onclick="deleteGaya(${idx})"><i class="fa-solid fa-trash"></i> Hapus</button>
+          </td>
+        </tr>
+      `).join("");
+
+      AdminState.sobatGaya.forEach((item, idx) => {
+        resolvePreview(item.gambar, `prev-gaya-${idx}`, 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&q=80&w=200&h=200');
+      });
+    }
+
+    window.deleteGaya = function(idx) {
+      if (confirm("Hapus barang ini?")) {
+        AdminState.sobatGaya.splice(idx, 1);
+        saveAndSync("sobatGaya");
+        renderGayaTable();
+      }
+    };
+
+    window.addGayaItem = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById("add-gaya-name").value;
+      const price = document.getElementById("add-gaya-price").value;
+      const fileInput = document.getElementById("add-gaya-img-file");
+      const phone = document.getElementById("add-gaya-phone").value.replace(/\D/g,'');
+      const desc = document.getElementById("add-gaya-desc").value;
+
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const mediaKey = `db://media-gaya-add-${Date.now()}`;
+      try {
+        await window.PSIMediaDB.save(mediaKey, file);
+
+        const item = {
+          id: AdminState.sobatGaya.length + 1,
+          nama: name,
+          deskripsi: desc,
+          harga: price,
+          gambar: mediaKey,
+          wa: phone.startsWith("0") ? "62" + phone.slice(1) : phone
+        };
+
+        AdminState.sobatGaya.unshift(item);
+        saveAndSync("sobatGaya");
+        renderGayaTable();
+        document.getElementById("form-add-gaya").reset();
+        document.getElementById("preview-gaya").textContent = "Belum ada file dipilih";
+        alert("Merchandise baru berhasil ditambahkan!");
+      } catch (err) {
+        alert("Gagal mengunggah gambar merchandise!");
+      }
+    };
+
+    // 6. Sobat Karya
+    function renderKaryaTable() {
+      const tbody = document.getElementById("admin-karya-tbody");
+      tbody.innerHTML = AdminState.sobatKarya.map((item, idx) => `
+        <tr>
+          <td style="font-weight:700; font-size:0.85rem;">${item.nama}</td>
+          <td>${item.penyedia}</td>
+          <td>${item.kategori}</td>
+          <td>${item.tarif}</td>
+          <td>+${item.kontak}</td>
+          <td>
+            <button class="btn-action-delete" onclick="deleteKarya(${idx})" style="padding:6px 12px;"><i class="fa-solid fa-trash"></i> Hapus</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.deleteKarya = function(idx) {
+      if (confirm("Hapus layanan jasa ini?")) {
+        AdminState.sobatKarya.splice(idx, 1);
+        saveAndSync("sobatKarya");
+        renderKaryaTable();
+      }
+    };
+
+    window.addKaryaItem = function(e) {
+      e.preventDefault();
+      const name = document.getElementById("add-karya-name").value;
+      const category = document.getElementById("add-karya-category").value;
+      const provider = document.getElementById("add-karya-provider").value;
+      const price = document.getElementById("add-karya-price").value;
+      const phone = document.getElementById("add-karya-phone").value.replace(/\D/g,'');
+      const desc = document.getElementById("add-karya-desc").value;
+
+      const item = {
+        id: AdminState.sobatKarya.length + 1,
+        nama: name,
+        kategori: category,
+        penyedia: provider,
+        deskripsi: desc,
+        tarif: price,
+        kontak: phone.startsWith("0") ? "62" + phone.slice(1) : phone
+      };
+
+      AdminState.sobatKarya.unshift(item);
+      saveAndSync("sobatKarya");
+      renderKaryaTable();
+      document.getElementById("form-add-karya").reset();
+      alert("Layanan jasa baru berhasil ditambahkan!");
+    };
+
+    // 7. Peta DPC Management Logic
+    function renderDpcTable() {
+      const tbody = document.getElementById("admin-dpc-tbody");
+      tbody.innerHTML = AdminState.dpc.map((dpc, idx) => `
+        <tr>
+          <td style="font-weight:700;">${dpc.kecamatan}</td>
+          <td>${dpc.ketua}</td>
+          <td style="font-size:0.8rem;">${dpc.alamat}</td>
+          <td>+${dpc.telp}</td>
+          <td style="font-family:monospace; font-size:0.8rem; font-weight:700;">Lat: ${dpc.lat || '-'}, Lng: ${dpc.lng || '-'}</td>
+          <td>
+            <div class="action-cell">
+              <button class="btn-primary" onclick="openEditDpcModal(${idx})" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+              <button class="btn-action-delete" onclick="deleteDpc(${idx})" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Hapus</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.deleteDpc = function(idx) {
+      if (confirm("Hapus DPC Kecamatan ini?")) {
+        AdminState.dpc.splice(idx, 1);
+        saveAndSync("dpc");
+        renderDpcTable();
+      }
+    };
+
+    window.addDpcItem = function(e) {
+      e.preventDefault();
+      const kecamatan = document.getElementById("add-dpc-kecamatan").value;
+      const ketua = document.getElementById("add-dpc-ketua").value;
+      const alamat = document.getElementById("add-dpc-alamat").value;
+      const phone = document.getElementById("add-dpc-phone").value.replace(/\D/g,'');
+      const lat = parseFloat(document.getElementById("add-dpc-x").value);
+      const lng = parseFloat(document.getElementById("add-dpc-y").value);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        alert("Silakan pilih lokasi di peta terlebih dahulu dengan mengeklik peta!");
+        return;
+      }
+
+      const newItem = {
+        id: "dpc-" + kecamatan.toLowerCase().replace(/\s+/g, '-'),
+        nama: "DPC " + kecamatan,
+        kecamatan: kecamatan,
+        ketua: ketua,
+        alamat: alamat,
+        telp: phone.startsWith("0") ? "62" + phone.slice(1) : phone,
+        lat: lat,
+        lng: lng
+      };
+
+      AdminState.dpc.unshift(newItem);
+      saveAndSync("dpc");
+      renderDpcTable();
+      document.getElementById("form-add-dpc").reset();
+      
+      if (window.adminAddMarker) {
+        window.adminAddMap.removeLayer(window.adminAddMarker);
+        window.adminAddMarker = null;
+      }
+      alert("DPC Kecamatan baru berhasil ditambahkan!");
+    };
+
+    function initAdminMapPickers() {
+      // Add DPC picker
+      if (!window.adminAddMap) {
+        window.adminAddMap = L.map('add-dpc-map-picker', {
+          scrollWheelZoom: false
+        }).setView([-7.4726, 112.7138], 11);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(window.adminAddMap);
+        
+        window.adminAddMap.on('click', (e) => {
+          const lat = e.latlng.lat.toFixed(6);
+          const lng = e.latlng.lng.toFixed(6);
+          document.getElementById("add-dpc-x").value = lat;
+          document.getElementById("add-dpc-y").value = lng;
+          
+          if (window.adminAddMarker) {
+            window.adminAddMarker.setLatLng(e.latlng);
+          } else {
+            window.adminAddMarker = L.marker(e.latlng).addTo(window.adminAddMap);
+          }
+        });
+      }
+
+      // Edit DPC picker
+      if (!window.adminEditMap) {
+        window.adminEditMap = L.map('edit-dpc-map-picker', {
+          scrollWheelZoom: false
+        }).setView([-7.4726, 112.7138], 11);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(window.adminEditMap);
+        
+        window.adminEditMap.on('click', (e) => {
+          const lat = e.latlng.lat.toFixed(6);
+          const lng = e.latlng.lng.toFixed(6);
+          document.getElementById("edit-dpc-x").value = lat;
+          document.getElementById("edit-dpc-y").value = lng;
+          
+          if (window.adminEditMarker) {
+            window.adminEditMarker.setLatLng(e.latlng);
+          } else {
+            window.adminEditMarker = L.marker(e.latlng).addTo(window.adminEditMap);
+          }
+        });
+      }
+    }
+
+    window.openEditDpcModal = function(idx) {
+      const dpc = AdminState.dpc[idx];
+      if (!dpc) return;
+
+      document.getElementById("edit-dpc-index").value = idx;
+      document.getElementById("edit-dpc-kecamatan").value = dpc.kecamatan;
+      document.getElementById("edit-dpc-ketua").value = dpc.ketua;
+      document.getElementById("edit-dpc-alamat").value = dpc.alamat;
+      document.getElementById("edit-dpc-phone").value = dpc.telp;
+      document.getElementById("edit-dpc-x").value = dpc.lat || "";
+      document.getElementById("edit-dpc-y").value = dpc.lng || "";
+
+      document.getElementById("edit-dpc-modal").classList.add("active");
+
+      // Set view and marker in edit modal map
+      setTimeout(() => {
+        if (window.adminEditMap) {
+          window.adminEditMap.invalidateSize();
+          if (dpc.lat && dpc.lng) {
+            const latlng = [dpc.lat, dpc.lng];
+            window.adminEditMap.setView(latlng, 13);
+            if (window.adminEditMarker) {
+              window.adminEditMarker.setLatLng(latlng);
+            } else {
+              window.adminEditMarker = L.marker(latlng).addTo(window.adminEditMap);
+            }
+          } else {
+            window.adminEditMap.setView([-7.4726, 112.7138], 11);
+            if (window.adminEditMarker) {
+              window.adminEditMap.removeLayer(window.adminEditMarker);
+              window.adminEditMarker = null;
+            }
+          }
+        }
+      }, 200);
+    };
+
+    window.closeEditDpcModal = function() {
+      document.getElementById("edit-dpc-modal").classList.remove("active");
+    };
+
+    window.saveEditedDpc = function(e) {
+      e.preventDefault();
+      const idx = document.getElementById("edit-dpc-index").value;
+      const dpc = AdminState.dpc[idx];
+      if (!dpc) return;
+
+      dpc.kecamatan = document.getElementById("edit-dpc-kecamatan").value;
+      dpc.nama = "DPC " + dpc.kecamatan;
+      dpc.ketua = document.getElementById("edit-dpc-ketua").value;
+      dpc.alamat = document.getElementById("edit-dpc-alamat").value;
+      dpc.telp = document.getElementById("edit-dpc-phone").value.replace(/\D/g,'');
+      dpc.lat = parseFloat(document.getElementById("edit-dpc-x").value);
+      dpc.lng = parseFloat(document.getElementById("edit-dpc-y").value);
+
+      saveAndSync("dpc");
+      renderDpcTable();
+      closeEditDpcModal();
+      alert("Detail DPC Kecamatan berhasil diperbarui!");
+    };
+
+    // 8. Jadwal Kegiatan Management Logic
+    function renderJadwalTable() {
+      const tbody = document.getElementById("admin-jadwal-tbody");
+      tbody.innerHTML = AdminState.jadwalKegiatan.map((sched, idx) => `
+        <tr>
+          <td style="font-weight:700;">${sched.tanggal}</td>
+          <td>${sched.jam}</td>
+          <td style="font-weight:600; font-size:0.85rem;">${sched.nama}</td>
+          <td>${sched.lokasi}</td>
+          <td>
+            <div class="action-cell">
+              <button class="btn-primary" onclick="openEditJadwalModal(${idx})" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+              <button class="btn-action-delete" onclick="deleteJadwal(${idx})" style="padding:6px 12px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Hapus</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.deleteJadwal = function(idx) {
+      if (confirm("Hapus agenda kegiatan ini?")) {
+        AdminState.jadwalKegiatan.splice(idx, 1);
+        saveAndSync("jadwalKegiatan");
+        renderJadwalTable();
+      }
+    };
+
+    window.addJadwalItem = function(e) {
+      e.preventDefault();
+      const tanggal = document.getElementById("add-jadwal-tanggal").value;
+      const jam = document.getElementById("add-jadwal-jam").value;
+      const nama = document.getElementById("add-jadwal-nama").value;
+      const lokasi = document.getElementById("add-jadwal-lokasi").value;
+
+      const newItem = {
+        tanggal: tanggal,
+        jam: jam,
+        nama: nama,
+        lokasi: lokasi
+      };
+
+      AdminState.jadwalKegiatan.push(newItem);
+      saveAndSync("jadwalKegiatan");
+      renderJadwalTable();
+      document.getElementById("form-add-jadwal").reset();
+      alert("Agenda kegiatan baru berhasil ditambahkan!");
+    };
+
+    window.openEditJadwalModal = function(idx) {
+      const sched = AdminState.jadwalKegiatan[idx];
+      if (!sched) return;
+
+      document.getElementById("edit-jadwal-index").value = idx;
+      document.getElementById("edit-jadwal-tanggal").value = sched.tanggal;
+      document.getElementById("edit-jadwal-jam").value = sched.jam;
+      document.getElementById("edit-jadwal-nama").value = sched.nama;
+      document.getElementById("edit-jadwal-lokasi").value = sched.lokasi;
+
+      document.getElementById("edit-jadwal-modal").classList.add("active");
+    };
+
+    window.closeEditJadwalModal = function() {
+      document.getElementById("edit-jadwal-modal").classList.remove("active");
+    };
+
+    window.saveEditedJadwal = function(e) {
+      e.preventDefault();
+      const idx = document.getElementById("edit-jadwal-index").value;
+      const sched = AdminState.jadwalKegiatan[idx];
+      if (!sched) return;
+
+      sched.tanggal = document.getElementById("edit-jadwal-tanggal").value;
+      sched.jam = document.getElementById("edit-jadwal-jam").value;
+      sched.nama = document.getElementById("edit-jadwal-nama").value;
+      sched.lokasi = document.getElementById("edit-jadwal-lokasi").value;
+
+      saveAndSync("jadwalKegiatan");
+      renderJadwalTable();
+      closeEditJadwalModal();
+      alert("Agenda kegiatan berhasil diperbarui!");
+    };
+
+  </script>
+</body>
+</html>

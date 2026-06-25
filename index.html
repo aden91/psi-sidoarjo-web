@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DPD PSI Sidoarjo - Profesional, Modern & Elegan</title>
+  <!-- Favicon (Elephant Logo) -->
+  <link rel="shortcut icon" href="assets/logo_gajah.png" type="image/png">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation (Deep Black) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <img class="logo-img" src="assets/logo_gajah.png" alt="PSI Logo">
+        <div class="logo-text">
+          <span class="logo-title">DPD PSI Sidoarjo</span>
+          <span class="logo-subtitle">PARTAI SUPER TBK.</span>
+        </div>
+      </div>
+      
+      <ul class="sidebar-menu">
+        <li>
+          <a class="menu-item active" data-target="beranda">
+            <i class="fa-solid fa-house"></i> <span data-translate="menu_home">Beranda</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="profil">
+            <i class="fa-solid fa-user-group"></i> <span data-translate="menu_profile">Profil DPD</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="visi-misi">
+            <i class="fa-solid fa-bullseye"></i> <span data-translate="menu_visi">Visi & Misi</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="berita">
+            <i class="fa-solid fa-newspaper"></i> <span data-translate="menu_news">Berita Kegiatan</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="video">
+            <i class="fa-solid fa-video"></i> <span data-translate="menu_video">Galeri Video</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="umkm">
+            <i class="fa-solid fa-store"></i> <span data-translate="menu_umkm">UMKM Sidoarjo</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="sobat-pangan">
+            <i class="fa-solid fa-wheat-awn"></i> <span data-translate="menu_pangan">Sobat Pangan</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="sobat-gaya">
+            <i class="fa-solid fa-shirt"></i> <span data-translate="menu_gaya">Sobat Gaya</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="sobat-hukum">
+            <i class="fa-solid fa-scale-balanced"></i> <span data-translate="menu_hukum">Sobat Hukum</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="sobat-karya">
+            <i class="fa-solid fa-handshake-angle"></i> <span data-translate="menu_karya">Sobat Karya</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="peta-dpc">
+            <i class="fa-solid fa-map-location-dot"></i> <span data-translate="menu_map">Peta DPC</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-target="jadwal">
+            <i class="fa-solid fa-calendar-days"></i> <span data-translate="menu_schedule">Jadwal Kegiatan</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar Social Media -->
+      <div class="sidebar-social">
+        <span class="sidebar-social-title">Media Sosial Resmi</span>
+        <div class="social-links">
+          <a href="https://www.facebook.com/dpdpsisidoarjo/?locale=id_ID" target="_blank" class="social-link" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/dpdpsisidoarjo/" target="_blank" class="social-link" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.tiktok.com/@psisidoarjo?lang=ar" target="_blank" class="social-link" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://www.youtube.com/channel/UCcsBRLjAGPWK4HYyIdqKtJg" target="_blank" class="social-link" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="https://aku.psi.id/" target="_blank" class="btn-header-join" style="width: 100%; justify-content: center;">
+          <i class="fa-solid fa-id-card"></i> Daftar Anggota
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Header (Clean White) -->
+      <header class="top-header">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <button class="hamburger" id="hamburger-btn">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="header-title">
+            <h1 id="page-title">Beranda</h1>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Dark Mode & Lang Switcher -->
+          <div class="header-controls">
+            <button id="dark-mode-toggle" class="header-control-btn" title="Ubah Mode Layar">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+            <div class="lang-selector-container">
+              <select id="lang-select" class="header-lang-select" onchange="changeLanguage(this.value)">
+                <option value="id">🇮🇩 ID</option>
+                <option value="en">🇬🇧 EN</option>
+                <option value="ja">🇯🇵 JA</option>
+                <option value="zh">🇨🇳 ZH</option>
+                <option value="ar">🇸🇦 AR</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="font-size: 0.85rem; color: var(--text-secondary); text-align: right;" class="desktop-only">
+            <div><i class="fa-solid fa-clock-rotate-left"></i> <span id="current-time">11:09</span></div>
+            <div style="font-size: 0.75rem; color: var(--primary-red); font-weight: 700;" id="current-date">Rabu, 24 Juni 2026</div>
+          </div>
+          <!-- Logo di pojok kanan atas -->
+          <div class="header-logo-container">
+            <img src="assets/logo_gajah.png" alt="PSI Logo Top Right">
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Wrapper -->
+      <div class="content-wrapper">
+
+        <!-- 1. BERANDA SECTION -->
+        <section id="beranda" class="content-section active">
+          <div class="hero-slider-container">
+            <div class="hero-slider" id="hero-slider">
+              <!-- Slide 1: Berita -->
+              <div class="hero-slide active" style="background-image: linear-gradient(135deg, rgba(229, 27, 36, 0.15) 0%, rgba(18, 18, 20, 0.95) 100%), url('https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&q=80&w=1200');">
+                <span class="hero-tag" data-translate="slide_news_tag">Aksi Nyata & Berita DPD</span>
+                <h2 class="hero-title" data-translate="slide_news_title">Ayo Rek! Bareng-Bareng Bangun Sidoarjo Lebih Maju & Transparan</h2>
+                <p class="hero-desc" data-translate="slide_news_desc">Pantau terus berita kegiatan dan perjuangan politik LBH serta kader DPD/DPC PSI Kabupaten Sidoarjo secara nyata.</p>
+                <div class="hero-buttons">
+                  <a class="btn-primary" onclick="navigateToSection('berita')">
+                    <i class="fa-solid fa-newspaper"></i> <span data-translate="slide_news_btn">Baca Berita Terbaru</span>
+                  </a>
+                </div>
+              </div>
+              <!-- Slide 2: Video -->
+              <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(229, 27, 36, 0.15) 0%, rgba(18, 18, 20, 0.95) 100%), url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=1200');">
+                <span class="hero-tag" data-translate="slide_video_tag">Dokumentasi Aksi Sosial</span>
+                <h2 class="hero-title" data-translate="slide_video_title">Tonton Aksi Solidaritas Kami Melalui Galeri Video</h2>
+                <p class="hero-desc" data-translate="slide_video_desc">Saksikan rekap video kegiatan sosial, bakti masyarakat, dan konsolidasi pengurus di wilayah Kabupaten Sidoarjo.</p>
+                <div class="hero-buttons">
+                  <a class="btn-primary" onclick="navigateToSection('video')">
+                    <i class="fa-solid fa-circle-play"></i> <span data-translate="slide_video_btn">Tonton Galeri Video</span>
+                  </a>
+                </div>
+              </div>
+              <!-- Slide 3: UMKM Sidoarjo -->
+              <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(229, 27, 36, 0.15) 0%, rgba(18, 18, 20, 0.95) 100%), url('https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&q=80&w=1200');">
+                <span class="hero-tag" data-translate="slide_umkm_tag">Ekonomi Kreatif Sidoarjo</span>
+                <h2 class="hero-title" data-translate="slide_umkm_title">Dukung Produk Unggulan Lokal & UMKM Sidoarjo</h2>
+                <p class="hero-desc" data-translate="slide_umkm_desc">Temukan produk kuliner, fashion, dan kerajinan tangan berkualitas hasil karya UMKM binaan DPD PSI Sidoarjo.</p>
+                <div class="hero-buttons">
+                  <a class="btn-primary" onclick="navigateToSection('umkm')">
+                    <i class="fa-solid fa-store"></i> <span data-translate="slide_umkm_btn">Jelajahi Produk UMKM</span>
+                  </a>
+                </div>
+              </div>
+              <!-- Slide 4: Jadwal Kegiatan -->
+              <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(229, 27, 36, 0.15) 0%, rgba(18, 18, 20, 0.95) 100%), url('https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&q=80&w=1200');">
+                <span class="hero-tag" data-translate="slide_schedule_tag">Agenda Solidaritas</span>
+                <h2 class="hero-title" data-translate="slide_schedule_title">Ikuti Jadwal & Agenda Kegiatan Sosial Kami</h2>
+                <p class="hero-desc" data-translate="slide_schedule_desc">Jangan lewatkan kesempatan berpartisipasi langsung dalam baksos, layanan kesehatan gratis, dan forum publik PSI Sidoarjo.</p>
+                <div class="hero-buttons">
+                  <a class="btn-primary" onclick="navigateToSection('jadwal')">
+                    <i class="fa-solid fa-calendar-days"></i> <span data-translate="slide_schedule_btn">Lihat Jadwal Kegiatan</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Slider Controls -->
+            <button class="hero-slider-nav prev" id="hero-slider-prev" onclick="prevHeroSlide()">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="hero-slider-nav next" id="hero-slider-next" onclick="nextHeroSlide()">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            
+            <!-- Slider Dots -->
+            <div class="hero-slider-dots" id="hero-slider-dots">
+              <span class="dot active" onclick="setHeroSlide(0)"></span>
+              <span class="dot" onclick="setHeroSlide(1)"></span>
+              <span class="dot" onclick="setHeroSlide(2)"></span>
+              <span class="dot" onclick="setHeroSlide(3)"></span>
+            </div>
+          </div>
+
+          <div class="stats-container">
+            <div class="stat-item">
+              <div class="stat-value" id="stat-dpc">18</div>
+              <div class="stat-label" data-translate="stat_label_dpc">DPC Kecamatan</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="stat-umkm">150+</div>
+              <div class="stat-label" data-translate="stat_label_umkm">UMKM Binaan</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="stat-kegiatan">12</div>
+              <div class="stat-label" data-translate="stat_label_kegiatan">Kegiatan Bulan Ini</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="stat-kader">5.4K+</div>
+              <div class="stat-label" data-translate="stat_label_kader">Sobat PSI Sidoarjo</div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h2 data-translate="section_title_berita_utama">Berita Utama</h2>
+            <p data-translate="section_desc_berita_utama">Kegiatan dan aksi nyata PSI Sidoarjo di tengah masyarakat.</p>
+          </div>
+
+          <div class="news-grid" id="berita-utama-container">
+            <!-- News loaded from app.js -->
+          </div>
+        </section>
+
+        <!-- 2. PROFIL SECTION -->
+        <section id="profil" class="content-section">
+          <div class="glass-panel">
+            <div class="section-header">
+              <h2 data-translate="section_title_sejarah">Sejarah Singkat DPD</h2>
+              <p data-translate="section_desc_sejarah">Mengenal perjuangan PSI di Kabupaten Sidoarjo.</p>
+            </div>
+            <p id="sejarah-content" style="line-height: 1.8; color: var(--text-secondary); font-size: 1.05rem;"></p>
+          </div>
+
+          <div class="glass-panel">
+            <div class="section-header">
+              <h2 data-translate="section_title_pengurus">Struktur Kepengurusan DPD</h2>
+              <p data-translate="section_desc_pengurus">Bro dan Sist pengurus DPD PSI Kabupaten Sidoarjo.</p>
+            </div>
+            <div class="team-grid" id="pengurus-container">
+              <!-- Loaded from app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. VISI & MISI SECTION -->
+        <section id="visi-misi" class="content-section">
+          <div class="visi-box">
+            <div class="visi-title" data-translate="visi_title">Visi Perjuangan</div>
+            <p class="visi-text" id="visi-content"></p>
+          </div>
+
+          <div style="margin-top: 50px;">
+            <div class="section-header" style="text-align: center;">
+              <h2 data-translate="section_title_misi">Misi Kami</h2>
+              <p data-translate="section_desc_misi">Arah perjuangan nyata Partai Solidaritas Indonesia.</p>
+            </div>
+            <div class="misi-list" id="misi-container">
+              <!-- Loaded from app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. BERITA SECTION -->
+        <section id="berita" class="content-section">
+          <div class="section-header">
+            <h2 data-translate="section_title_berita">Kabar Solidaritas</h2>
+            <p data-translate="section_desc_berita">Berita lengkap aksi nyata PSI Sidoarjo.</p>
+          </div>
+          <div class="news-grid" id="berita-lengkap-container">
+            <!-- Loaded from app.js -->
+          </div>
+        </section>
+
+        <!-- 5. GALERI VIDEO SECTION -->
+        <section id="video" class="content-section">
+          <div class="glass-panel" style="padding: 24px;">
+            <div class="section-header">
+              <h2 data-translate="section_title_video">Rekap Video Kegiatan</h2>
+              <p data-translate="section_desc_video">Dokumentasi aksi sosial dan konsolidasi DPD serta DPC PSI se-Sidoarjo.</p>
+            </div>
+
+            <div class="filter-tabs" id="video-filter-tabs">
+              <button class="filter-btn active" data-category="Semua" data-translate="filter_all">Semua Video</button>
+              <button class="filter-btn" data-category="DPD Kabupaten" data-translate="filter_video_dpd">DPD Kabupaten</button>
+              <button class="filter-btn" data-category="DPC Kecamatan" data-translate="filter_video_dpc">DPC Kecamatan</button>
+            </div>
+
+            <div class="card-grid" id="video-gallery-container">
+              <!-- Loaded from app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. UMKM SECTION -->
+        <section id="umkm" class="content-section">
+          <div class="glass-panel" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+              <div class="section-header" style="margin-bottom: 0;">
+                <h2 data-translate="section_title_umkm">Katalog UMKM Sidoarjo</h2>
+                <p data-translate="section_desc_umkm">Mendukung ekonomi kreatif lokal di Sidoarjo.</p>
+              </div>
+              <button class="btn-primary" onclick="showUmkmRegisterModal()">
+                <i class="fa-solid fa-plus"></i> <span data-translate="btn_register_umkm">Daftarkan UMKM Anda</span>
+              </button>
+            </div>
+
+            <div class="filter-tabs" id="umkm-filter-tabs">
+              <button class="filter-btn active" data-category="Semua" data-translate="filter_all">Semua Produk</button>
+              <button class="filter-btn" data-category="Makanan" data-translate="filter_umkm_food">Kuliner & Makanan</button>
+              <button class="filter-btn" data-category="Fashion" data-translate="filter_umkm_fashion">Fashion & Pakaian</button>
+              <button class="filter-btn" data-category="Kerajinan" data-translate="filter_umkm_craft">Kerajinan Tangan</button>
+            </div>
+
+            <div class="card-grid" id="umkm-container">
+              <!-- Loaded from app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. SOBAT PANGAN SECTION -->
+        <section id="sobat-pangan" class="content-section">
+          <div class="pangan-grid">
+            <div class="glass-panel">
+              <div class="section-header">
+                <h2 data-translate="section_title_sembako">Pantau Harga Sembako Sidoarjo</h2>
+                <p data-translate="section_desc_sembako">Update harga komoditas pangan pokok rata-rata di pasar Sidoarjo hari ini.</p>
+              </div>
+              <div class="pangan-table-wrapper">
+                <table class="pangan-table">
+                  <thead>
+                    <tr>
+                      <th data-translate="table_header_commodity">Komoditas Pangan</th>
+                      <th data-translate="table_header_price">Harga Eceran (Rp)</th>
+                      <th data-translate="table_header_change">Perubahan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sembako-table-body">
+                    <!-- Loaded from app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="section-header">
+                <h2 data-translate="section_title_calc">Kalkulator Belanja Pintar</h2>
+                <p data-translate="section_desc_calc">Hitung estimasi pengeluaran bulanan sembako keluarga Anda.</p>
+              </div>
+              
+              <div class="calc-box">
+                <div class="calc-row">
+                  <label for="calc-select-food" data-translate="calc_label_select">Pilih Bahan Pokok</label>
+                  <div class="calc-input-group">
+                    <select id="calc-select-food">
+                      <!-- Options loaded from data.js -->
+                    </select>
+                    <input type="number" id="calc-qty-food" value="1" min="1">
+                  </div>
+                </div>
+
+                <button class="calc-btn-add" id="calc-add-item-btn">
+                  <i class="fa-solid fa-plus"></i> <span data-translate="calc_btn_add">Tambah ke Keranjang</span>
+                </button>
+
+                <div class="calc-list" id="calc-cart-list">
+                  <!-- Cart items -->
+                </div>
+
+                <div class="calc-result-box">
+                  <div class="calc-result-title" data-translate="calc_result_title">Total Estimasi Belanja</div>
+                  <div class="calc-total" id="calc-total-amount">Rp 0</div>
+                  <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px;" data-translate="calc_note">*Harga di atas adalah estimasi rata-rata pasar rakyat Sidoarjo.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. SOBAT GAYA SECTION -->
+        <section id="sobat-gaya" class="content-section">
+          <div class="section-header">
+            <h2 data-translate="section_title_gaya">Gaya Solidaritas</h2>
+            <p data-translate="section_desc_gaya">Pilihan Baju, Jaket, dan Fashion Keren Resmi PSI Sidoarjo.</p>
+          </div>
+          
+          <div class="card-grid" id="sobat-gaya-container">
+            <!-- Loaded from app.js -->
+          </div>
+        </section>
+
+        <!-- 9. SOBAT HUKUM SECTION -->
+        <section id="sobat-hukum" class="content-section">
+          <div class="hukum-grid">
+            <div class="glass-panel">
+              <div class="section-header">
+                <h2 data-translate="section_title_hukum_form">Pengajuan Layanan Hukum</h2>
+                <p data-translate="section_desc_hukum_form">Konsultasi Hukum Gratis, Pendampingan Hukum & Legalitas UMKM Sidoarjo.</p>
+              </div>
+
+              <form class="legal-form" id="legal-consultation-form" onsubmit="handleLegalFormSubmit(event)">
+                <div class="form-group">
+                  <label for="legal-name" data-translate="form_label_name">Nama Lengkap</label>
+                  <input type="text" id="legal-name" required placeholder="Masukkan nama lengkap Anda" data-translate="form_placeholder_name">
+                </div>
+                <div class="form-group">
+                  <label for="legal-phone" data-translate="form_label_phone">No. WhatsApp</label>
+                  <input type="tel" id="legal-phone" required placeholder="Contoh: 081234567890" data-translate="form_placeholder_phone">
+                </div>
+                <div class="form-group">
+                  <label for="legal-service" data-translate="form_label_service">Jenis Layanan</label>
+                  <select id="legal-service">
+                    <option value="Konsultasi Hukum Gratis" data-translate="opt_service_consult">Konsultasi Hukum Gratis</option>
+                    <option value="Pendampingan Hukum" data-translate="opt_service_assist">Pendampingan Hukum Perkara</option>
+                    <option value="Pengurusan Legalitas UMKM" data-translate="opt_service_umkm">Pengurusan Legalitas UMKM (NIB/Halal)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="legal-desc" data-translate="form_label_desc">Deskripsi Kasus / Kebutuhan</label>
+                  <textarea id="legal-desc" rows="4" required placeholder="Jelaskan secara singkat permasalahan hukum atau kebutuhan izin legalitas UMKM Anda..." data-translate="form_placeholder_desc"></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="justify-content: center; width: 100%;">
+                  <i class="fa-solid fa-paper-plane"></i> <span data-translate="form_btn_submit_hukum">Ajukan Bantuan Hukum</span>
+                </button>
+              </form>
+            </div>
+
+            <div class="glass-panel" style="display: flex; flex-direction: column; justify-content: center;">
+              <div class="section-header">
+                <h2 data-translate="section_title_hukum_steps">Alur Pendampingan Hukum</h2>
+                <p data-translate="section_desc_hukum_steps">Bagaimana LBH DPD PSI Sidoarjo mengawal permohonan Anda.</p>
+              </div>
+
+              <div class="legal-steps">
+                <div class="step-card">
+                  <div class="step-icon">1</div>
+                  <div>
+                    <h4 style="font-weight: 700; margin-bottom: 4px;" data-translate="step1_title">Pemberkasan Masuk</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);" data-translate="step1_desc">Form konsultasi dikirim oleh warga Sidoarjo melalui website.</p>
+                  </div>
+                </div>
+                <div class="step-card">
+                  <div class="step-icon">2</div>
+                  <div>
+                    <h4 style="font-weight: 700; margin-bottom: 4px;" data-translate="step2_title">Analisa Hukum oleh Tim LBH</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);" data-translate="step2_desc">Kasus dianalisis secara objektif oleh Advokat & Kader Hukum PSI.</p>
+                  </div>
+                </div>
+                <div class="step-card">
+                  <div class="step-icon">3</div>
+                  <div>
+                    <h4 style="font-weight: 700; margin-bottom: 4px;" data-translate="step3_title">Tindak Lanjut & Pendampingan</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);" data-translate="step3_desc">Warga dihubungi via WhatsApp untuk penyusunan berkas & pendampingan gratis.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 10. SOBAT KARYA SECTION -->
+        <section id="sobat-karya" class="content-section">
+          <div class="glass-panel" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+              <div class="section-header" style="margin-bottom: 0;">
+                <h2 data-translate="section_title_karya">Jasa Sobat Karya</h2>
+                <p data-translate="section_desc_karya">Pesan jasa berkualitas langsung dari kader & simpatisan PSI Sidoarjo.</p>
+              </div>
+              <button class="btn-primary" onclick="showKaryaRegisterModal()">
+                <i class="fa-solid fa-plus"></i> <span data-translate="btn_register_karya">Daftarkan Jasa Anda</span>
+              </button>
+            </div>
+
+            <div class="filter-tabs" id="karya-filter-tabs">
+              <button class="filter-btn active" data-category="Semua" data-translate="filter_all">Semua Jasa</button>
+              <button class="filter-btn" data-category="Jasa Desain" data-translate="filter_karya_design">Jasa Desain</button>
+              <button class="filter-btn" data-category="Jasa Service" data-translate="filter_karya_service">Jasa Service</button>
+              <button class="filter-btn" data-category="Jasa Lainnya" data-translate="filter_karya_other">Jasa Lainnya</button>
+            </div>
+
+            <div class="card-grid" id="sobat-karya-container">
+              <!-- Loaded from app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 11. PETA WILAYAH SECTION -->
+        <section id="peta-dpc" class="content-section">
+          <div class="map-grid">
+            <div class="glass-panel" style="padding: 20px;">
+              <div class="section-header" style="margin-bottom: 16px;">
+                <h2 data-translate="section_title_map">Sebaran Pengurus DPC Sidoarjo</h2>
+                <p data-translate="section_desc_map">Klik logo Gajah bersinar di peta untuk melihat detail DPC Kecamatan.</p>
+              </div>
+
+              <!-- Interactive Sidoarjo Geographic Map -->
+              <div class="visual-map-container" id="visual-map-box">
+                <!-- Leaflet Map Container -->
+              </div>
+            </div>
+
+            <div class="map-details" id="dpc-info-panel">
+              <div class="map-info-placeholder">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <h3 data-translate="dpc_placeholder_title">Informasi DPC Kecamatan</h3>
+                <p data-translate="dpc_placeholder_desc">Pilih salah satu DPC Kecamatan pada peta untuk memunculkan nama ketua pengurus, nomor kontak WhatsApp, dan alamat kantor DPC.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 12. JADWAL KEGIATAN SECTION -->
+        <section id="jadwal" class="content-section">
+          <div class="section-header">
+            <h2 data-translate="section_title_jadwal">Jadwal & Agenda PSI Sidoarjo</h2>
+            <p data-translate="section_desc_jadwal">Ikuti rangkaian kegiatan sosial dan kemasyarakatan dari kami.</p>
+          </div>
+
+          <div class="schedule-list" id="jadwal-container">
+            <!-- Loaded from app.js -->
+          </div>
+        </section>
+
+        <!-- Admin Panel removed from inline; now linked externally -->
+
+      </div>
+      
+      <!-- Site Footer with branding and social links -->
+      <footer class="site-footer">
+        <div class="footer-logo">
+          <img src="assets/logo_gajah.png" alt="PSI Logo Footer">
+          <div>
+            <strong style="display:block; font-size:0.95rem;" data-translate="footer_title">DPD PSI Kabupaten Sidoarjo</strong>
+            <span style="font-size:0.75rem; color:var(--text-muted);" data-translate="footer_copyright">© 2026 DPD PSI Sidoarjo. Hak Cipta Dilindungi.</span>
+          </div>
+        </div>
+        <div class="footer-social-links">
+          <a href="https://www.facebook.com/dpdpsisidoarjo/?locale=id_ID" target="_blank" class="footer-social-link" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/dpdpsisidoarjo/" target="_blank" class="footer-social-link" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.tiktok.com/@psisidoarjo?lang=ar" target="_blank" class="footer-social-link" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://www.youtube.com/channel/UCcsBRLjAGPWK4HYyIdqKtJg" target="_blank" class="footer-social-link" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- AI Tanya Jawab Widget -->
+  <div class="ai-chatbot-widget">
+    <button class="chatbot-toggle-btn" id="chatbot-toggle" onclick="toggleChatbot()">
+      <i class="fa-solid fa-comments"></i>
+    </button>
+    <div class="chatbot-window" id="chatbot-window">
+      <div class="chatbot-header">
+        <div class="chatbot-avatar">
+          <div class="chatbot-avatar-circle">
+            <img src="assets/mascot_gajah.png" alt="PSI Mascot Elephant">
+          </div>
+          <div class="chatbot-avatar-info">
+            <h4>Sobat AI Sidoarjo</h4>
+            <span><i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> Online</span>
+          </div>
+        </div>
+        <button class="chatbot-close-btn" onclick="toggleChatbot()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="chatbot-messages" id="chatbot-messages-container">
+        <!-- Message list -->
+      </div>
+
+      <!-- Quick reply chips -->
+      <div class="chatbot-chips" id="chatbot-chips-container">
+        <button class="chip-btn" onclick="sendQuickReply('cara daftar anggota')">Cara Daftar Anggota</button>
+        <button class="chip-btn" onclick="sendQuickReply('visi misi psi')">Visi & Misi PSI</button>
+        <button class="chip-btn" onclick="sendQuickReply('konsultasi hukum')">Konsultasi Hukum</button>
+        <button class="chip-btn" onclick="sendQuickReply('kegiatan terdekat')">Kegiatan Terdekat</button>
+      </div>
+
+      <div class="chatbot-input-area">
+        <input type="text" class="chatbot-input" id="chatbot-text-input" placeholder="Tanya seputar PSI Sidoarjo..." onkeypress="handleChatbotKeyPress(event)">
+        <button class="chatbot-send-btn" onclick="submitChatbotMessage()">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed News Modal -->
+  <div class="modal-overlay" id="news-detail-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="news-modal-title">Judul Berita</h3>
+        <button class="modal-close" onclick="closeNewsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img id="news-modal-img" src="" alt="Berita" style="width: 100%; height: 260px; object-fit: cover; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px;">
+          <span id="news-modal-date" style="font-size: 0.85rem; color: var(--primary-red); font-weight: 700;">24 Juni 2026</span>
+          <span id="news-modal-views" class="news-views-badge"><i class="fa-regular fa-eye"></i> 0 Dilihat</span>
+        </div>
+        <p id="news-modal-content" style="line-height: 1.8; color: var(--text-secondary); margin-bottom: 20px;"></p>
+        
+        <!-- Hashtags -->
+        <div class="hashtag-chips-container" id="news-modal-hashtags"></div>
+
+        <!-- SEO Info Box -->
+        <div class="seo-info-box">
+          <div class="seo-info-title"><i class="fa-solid fa-square-rss"></i> Optimasi SEO Berita</div>
+          <div class="seo-row"><strong>Frasa Kunci Fokus:</strong> <span class="seo-val" id="news-modal-seo-keyphrase">-</span></div>
+          <div class="seo-row" style="margin-top:6px;"><strong>Deskripsi Meta:</strong> <p style="color:var(--text-secondary); margin-top:4px;" id="news-modal-seo-metadesc">-</p></div>
+          <div style="margin-top:12px;">
+            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;">Tautan Berbagi (SEO Slug):</label>
+            <div class="share-link-box">
+              <span class="share-link-text" id="news-modal-seo-sharelink">http://localhost:3000/berita/slug</span>
+              <button class="share-copy-btn" onclick="copyShareLink()"><i class="fa-regular fa-copy"></i></button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Komentar Berita -->
+        <div class="news-comments-wrapper">
+          <h4 class="comments-title"><i class="fa-regular fa-comments"></i> Komentar Warga Sidoarjo</h4>
+          <div class="comments-list" id="news-comments-list">
+            <!-- Dynamic comments bubbles -->
+          </div>
+          <form class="comment-form" id="news-comment-form" onsubmit="submitNewsComment(event)">
+            <input type="text" id="comment-author-name" required placeholder="Nama Anda (Warga Sidoarjo)">
+            <textarea id="comment-author-text" rows="2" required placeholder="Tulis komentar/aspirasi Anda terhadap kegiatan ini..."></textarea>
+            <button type="submit" class="btn-primary" style="align-self: flex-end; padding: 6px 16px; font-size: 0.8rem;">
+              <i class="fa-regular fa-paper-plane"></i> Kirim Komentar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UMKM Register Modal -->
+  <div class="modal-overlay" id="umkm-register-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Daftarkan UMKM Sidoarjo Anda</h3>
+        <button class="modal-close" onclick="closeUmkmModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form class="legal-form" id="umkm-reg-form" onsubmit="handleUmkmRegister(event)">
+          <div class="form-group">
+            <label for="reg-umkm-name">Nama Usaha / Toko</label>
+            <input type="text" id="reg-umkm-name" required placeholder="Contoh: Otak-otak Bandeng Candi">
+          </div>
+          <div class="form-group">
+            <label for="reg-umkm-category">Kategori Usaha</label>
+            <select id="reg-umkm-category">
+              <option value="Makanan">Makanan / Kuliner</option>
+              <option value="Fashion">Fashion / Pakaian</option>
+              <option value="Kerajinan">Kerajinan Tangan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-umkm-desc">Deskripsi Singkat Produk</label>
+            <textarea id="reg-umkm-desc" rows="3" required placeholder="Jelaskan produk unggulan yang Anda jual..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="reg-umkm-price">Rentang Harga</label>
+            <input type="text" id="reg-umkm-price" required placeholder="Contoh: Rp 10.000 - Rp 35.000">
+          </div>
+          <div class="form-group">
+            <label for="reg-umkm-address">Alamat (Kecamatan di Sidoarjo)</label>
+            <input type="text" id="reg-umkm-address" required placeholder="Contoh: Kec. Krian, Sidoarjo">
+          </div>
+          <div class="form-group">
+            <label for="reg-umkm-phone">No. WhatsApp Hubungi</label>
+            <input type="tel" id="reg-umkm-phone" required placeholder="Contoh: 081234567890">
+          </div>
+          <button type="submit" class="btn-primary" style="justify-content: center; width: 100%;">
+            <i class="fa-solid fa-check"></i> Daftarkan Sekarang
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Karya Register Modal -->
+  <div class="modal-overlay" id="karya-register-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Daftarkan Keahlian Jasa Anda</h3>
+        <button class="modal-close" onclick="closeKaryaModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form class="legal-form" id="karya-reg-form" onsubmit="handleKaryaRegister(event)">
+          <div class="form-group">
+            <label for="reg-karya-name">Nama Layanan Jasa</label>
+            <input type="text" id="reg-karya-name" required placeholder="Contoh: Jasa Servis AC Dingin Bergaransi">
+          </div>
+          <div class="form-group">
+            <label for="reg-karya-category">Kategori Jasa</label>
+            <select id="reg-karya-category">
+              <option value="Jasa Desain">Jasa Desain Grafis / Sosmed</option>
+              <option value="Jasa Service">Jasa Service (AC/Laptop/Motor)</option>
+              <option value="Jasa Lainnya">Jasa Lainnya (Jahit/Pembersih)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-karya-provider">Nama Penyedia Jasa</label>
+            <input type="text" id="reg-karya-provider" required placeholder="Masukkan nama Anda">
+          </div>
+          <div class="form-group">
+            <label for="reg-karya-desc">Deskripsi Jasa & Keahlian</label>
+            <textarea id="reg-karya-desc" rows="3" required placeholder="Jelaskan detail keahlian dan garansi jasa Anda..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="reg-karya-price">Perkiraan Tarif</label>
+            <input type="text" id="reg-karya-price" required placeholder="Contoh: Rp 60.000 / cuci">
+          </div>
+          <div class="form-group">
+            <label for="reg-karya-phone">No. WhatsApp Pemesanan</label>
+            <input type="tel" id="reg-karya-phone" required placeholder="Contoh: 081234567890">
+          </div>
+          <button type="submit" class="btn-primary" style="justify-content: center; width: 100%;">
+            <i class="fa-solid fa-check"></i> Daftarkan Jasa Sekarang
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Scripts -->
+  <script src="db.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
